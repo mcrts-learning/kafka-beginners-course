@@ -36,10 +36,10 @@ public class TwitterProducer {
         FileInputStream in = new FileInputStream(configPath);
         conf.load(in);
         in.close();
-        consumerKey = conf.getProperty("twitter.consumerKey");
-        consumerSecret = conf.getProperty("twitter.consumerSecret");
-        token = conf.getProperty("twitter.token");
-        secret = conf.getProperty("twitter.secret");
+        consumerKey = conf.getProperty("twitter.consumer.key");
+        consumerSecret = conf.getProperty("twitter.consumer.secret");
+        token = conf.getProperty("twitter.auth.token");
+        secret = conf.getProperty("twitter.auth.secret");
     }
 
     public static Properties getProperties(String bootstrapServers) {
@@ -61,7 +61,6 @@ public class TwitterProducer {
 
         // These secrets should be read from a config file
         Authentication hosebirdAuth = new OAuth1(consumerKey, consumerSecret, token, secret);
-
         ClientBuilder builder = new ClientBuilder()
                 .name("Hosebird-Client-01")                              // optional: mainly for the logs
                 .hosts(hosebirdHosts)

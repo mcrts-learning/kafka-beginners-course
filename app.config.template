@@ -1,0 +1,4 @@
+twitter.consumer.key=consumerKey
+twitter.consumer.secret=consumerSecret
+twitter.auth.token=token
+twitter.auth.secret=secret

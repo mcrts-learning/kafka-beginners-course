@@ -1,4 +1,4 @@
-package com.github.mcrts.kafka.twitter;
+package producer;
 
 import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
@@ -23,13 +23,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class TwitterProducer {
+public class TwitterSafeProducer {
     String consumerKey = "";
     String consumerSecret = "";
     String token = "";
     String secret = "";
 
-    public TwitterProducer() {}
+    public TwitterSafeProducer() {}
 
     public void setConfig(String configPath) throws IOException {
         Properties conf = new Properties();
@@ -47,6 +47,11 @@ public class TwitterProducer {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+        properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+        properties.setProperty(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
+        properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");
         return properties;
     }
 
@@ -73,7 +78,7 @@ public class TwitterProducer {
     }
 
     public void run() {
-        Logger logger = LoggerFactory.getLogger(TwitterProducer.class.getName());
+        Logger logger = LoggerFactory.getLogger(TwitterSafeProducer.class.getName());
         String bootstrapServers = "127.0.0.1:9092";
         String topic = "twitter_tweets";
         BlockingQueue<String> msgQueue = new LinkedBlockingQueue<String>(1000);
@@ -121,8 +126,8 @@ public class TwitterProducer {
     }
 
     public static void main(String[] args) throws IOException {
-        TwitterProducer producer = new TwitterProducer();
-        producer.setConfig("src/main/app.config");
+        TwitterSafeProducer producer = new TwitterSafeProducer();
+        producer.setConfig("./app.config");
         producer.run();
     }
 }

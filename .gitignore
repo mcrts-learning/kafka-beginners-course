@@ -16,4 +16,4 @@ log/
 target/
 
 # Project
-src/main/app.config
+app.config

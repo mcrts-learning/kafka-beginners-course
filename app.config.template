@@ -2,3 +2,7 @@ twitter.consumer.key=consumerKey
 twitter.consumer.secret=consumerSecret
 twitter.auth.token=token
 twitter.auth.secret=secret
+
+bonsai.hostname=hostname
+bonsai.username=username
+bonsai.password=password

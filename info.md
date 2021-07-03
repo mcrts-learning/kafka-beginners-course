@@ -22,3 +22,10 @@ Consumer reset offset
 ```console
 kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group bonsai-app-2 --reset-offsets --execute --to-earliest --topic twitter_tweets
 ```
+
+
+Twitter connect
+```console
+kafka-topics.sh --bootstrap-server localhost:9092 --topic twitter_status_connect --create --partitions 3 --replication-factor 1
+kafka-topics.sh --bootstrap-server localhost:9092 --topic twitter_deletes_connect --create --partitions 3 --replication-factor 1
+```

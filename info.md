@@ -12,3 +12,13 @@ Console consumer
 ```console
 kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic twitter_tweets --from-beginning
 ```
+
+Consumer describe
+```console
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group bonsai-app-2 --describe
+```
+
+Consumer reset offset
+```console
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group bonsai-app-2 --reset-offsets --execute --to-earliest --topic twitter_tweets
+```

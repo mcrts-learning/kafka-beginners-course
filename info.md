@@ -29,3 +29,9 @@ Twitter connect
 kafka-topics.sh --bootstrap-server localhost:9092 --topic twitter_status_connect --create --partitions 3 --replication-factor 1
 kafka-topics.sh --bootstrap-server localhost:9092 --topic twitter_deletes_connect --create --partitions 3 --replication-factor 1
 ```
+
+Twitter streams
+```console
+kafka-topics.sh --bootstrap-server localhost:9092 --topic important_tweets --create --partitions 3 --replication-factor 1
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic important_tweets --from-beginning
+```

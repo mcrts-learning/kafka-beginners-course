@@ -1,4 +1,4 @@
-package com.github.mcrts.ElasticConsumer;
+package com.github.mcrts.streams.ElasticConsumer;
 
 import com.google.gson.JsonParser;
 import org.apache.http.HttpHost;
@@ -11,7 +11,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;

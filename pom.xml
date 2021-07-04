@@ -12,7 +12,7 @@
         <module>kafka-basics</module>
         <module>kafka-producer-twitter</module>
         <module>kafka-consumer-elastic</module>
-        <module>kafka-connect</module>
+        <module>kafka-streams-filter-tweets</module>
     </modules>
 
     <properties>

@@ -1,4 +1,4 @@
-package com.github.mcrts.ElasticConsumer;
+package com.github.mcrts.streams.ElasticConsumer;
 
 import com.google.gson.JsonParser;
 import org.apache.http.HttpHost;
@@ -12,9 +12,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -29,12 +29,12 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
-public class ElasticSearchConsumerManualCommit {
+public class ElasticSearchConsumerBulk {
     String hostname = "";
     String username = "";
     String password = "";
 
-    public ElasticSearchConsumerManualCommit() {}
+    public ElasticSearchConsumerBulk() {}
 
     public void setConfig(String configPath) throws IOException {
         Properties conf = new Properties();
@@ -56,12 +56,12 @@ public class ElasticSearchConsumerManualCommit {
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");
+        properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "100");
         return properties;
     }
 
     public static KafkaConsumer<String, String> createConsumer() {
-        Logger logger = LoggerFactory.getLogger(ElasticSearchConsumerManualCommit.class.getName());
+        Logger logger = LoggerFactory.getLogger(ElasticSearchConsumerBulk.class.getName());
         String topic = "twitter_tweets";
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(getProperties());
@@ -88,13 +88,17 @@ public class ElasticSearchConsumerManualCommit {
     }
 
     public void run() throws IOException {
-        Logger logger = LoggerFactory.getLogger(ElasticSearchConsumerManualCommit.class.getName());
+        Logger logger = LoggerFactory.getLogger(ElasticSearchConsumerBulk.class.getName());
 
         RestHighLevelClient client = createClient();
         KafkaConsumer<String, String> consumer = createConsumer();
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
             logger.info("Received " + records.count() + " records");
+            Integer recordCount = records.count();
+
+            BulkRequest bulkRequest = new BulkRequest();
+
             for (ConsumerRecord record : records) {
                 //String id = record.topic() + "_" + record.partition() + "_" + record.offset();
                 String id = extractIdFromTweet((String) record.value());
@@ -103,24 +107,15 @@ public class ElasticSearchConsumerManualCommit {
                         "tweets",
                         id
                 ).source((String) record.value(), XContentType.JSON);
-
-                try {
-                    IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
-                    logger.info(indexResponse.getId());
-                } catch (ElasticsearchStatusException e) {
-                    logger.info("~~" + id);
-                }
-
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                bulkRequest.add(indexRequest);
             }
 
-            logger.info("Committing the offsets...");
-            consumer.commitSync();
-            logger.info("Offsets committed");
+            if (recordCount > 0) {
+                BulkResponse bulkItemResponses = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+                logger.info("Committing the offsets...");
+                consumer.commitSync();
+                logger.info("Offsets committed");
+            }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -136,7 +131,7 @@ public class ElasticSearchConsumerManualCommit {
     }
 
     public static void main(String[] args) throws IOException {
-        ElasticSearchConsumerManualCommit consumer = new ElasticSearchConsumerManualCommit();
+        ElasticSearchConsumerBulk consumer = new ElasticSearchConsumerBulk();
         consumer.setConfig("./app.config");
         consumer.run();
     }
